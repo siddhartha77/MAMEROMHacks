@@ -1,0 +1,68 @@
+diff -Nru oldsrc/emu/render.cpp src/emu/render.cpp
+--- oldsrc/emu/render.cpp	2016-09-28 13:25:48.000000000 +1000
++++ src/emu/render.cpp	2018-06-30 11:08:54.331386037 +1000
+@@ -1398,7 +1398,8 @@
+ 		}
+ 
+ 	// if we are not in the running stage, draw an outer box
+-	else
++	// DISABLE WHITE BORDER
++	else if ( !m_manager.machine().options().skip_gameinfo() )
+ 	{
+ 		render_primitive *prim = list.alloc(render_primitive::QUAD);
+ 		set_render_bounds_xy(&prim->bounds, 0.0f, 0.0f, (float)m_width, (float)m_height);
+diff -Nru oldsrc/frontend/mame/ui/mainmenu.cpp src/frontend/mame/ui/mainmenu.cpp
+--- oldsrc/frontend/mame/ui/mainmenu.cpp	2016-09-28 13:25:48.000000000 +1000
++++ src/frontend/mame/ui/mainmenu.cpp	2018-06-30 11:11:49.941024497 +1000
+@@ -134,6 +134,9 @@
+ 
+ 	item_append(menu_item_type::SEPARATOR);
+ 
++	// DISABLE SELECT NEW MACHINE & FAVORITES
++	if (!machine().options().skip_gameinfo())
++	{
+ 	/* add favorite menu */
+ 	if (!mame_machine_manager::instance()->favorite().isgame_favorite())
+ 		item_append(_("Add To Favorites"), "", 0, (void *)ADD_FAVORITE);
+@@ -146,6 +149,7 @@
+ 
+ 	/* add reset and exit menus */
+ 	item_append(_("Select New Machine"), "", 0, (void *)SELECT_GAME);
++	}
+ }
+ 
+ menu_main::~menu_main()
+diff -Nru oldsrc/frontend/mame/ui/ui.cpp src/frontend/mame/ui/ui.cpp
+--- oldsrc/frontend/mame/ui/ui.cpp	2016-09-28 13:25:48.000000000 +1000
++++ src/frontend/mame/ui/ui.cpp	2018-06-30 11:08:54.331386037 +1000
+@@ -307,7 +307,8 @@
+ 		switch (state)
+ 		{
+ 			case 0:
+-				if (show_warnings)
++				// DISABLE INTERACTIVE WARNING MESSAGES
++				if (show_gameinfo)
+ 					messagebox_text = machine_info().warnings_string();
+ 				if (!messagebox_text.empty())
+ 				{
+@@ -771,6 +772,10 @@
+ 
+ UINT32 mame_ui_manager::handler_messagebox(render_container &container)
+ {
++	// DISABLE INITIALIZING, LOADING & DECRYPTING MESSAGES
++	if (machine().options().skip_gameinfo())
++		return 0;
++
+ 	draw_text_box(container, messagebox_text.c_str(), ui::text_layout::LEFT, 0.5f, 0.5f, messagebox_backcolor);
+ 	return 0;
+ }
+
+
+
+
+
+
+
+
+
+
